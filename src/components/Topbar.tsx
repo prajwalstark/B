@@ -3,9 +3,9 @@ import { BackIcon, CloseIcon, MenuIcon, ArrowRight } from './Icons';
 import { navigate } from '../lib/hooks';
 
 const LINKS = [
-  { to: '/', label: 'Race weekend' },
-  { to: '/live', label: 'Live tracker' },
-  { to: '/drivers', label: 'Drivers' },
+  { to: 'home', label: 'Race weekend' },
+  { to: 'live', label: 'Live tracker' },
+  { to: 'drivers', label: 'Drivers' },
 ];
 
 export function Topbar({ title, back, current }: { title: ReactNode; back?: string; current: string }) {
@@ -18,7 +18,7 @@ export function Topbar({ title, back, current }: { title: ReactNode; back?: stri
             <BackIcon />
           </button>
         ) : (
-          <a className="brand__mark" href="#/" aria-label="Pitwall home">
+          <a className="brand__mark" href="#home" aria-label="Pitwall home">
             <svg width="24" height="24" viewBox="0 0 32 32">
               <path d="M4 24 14 8h14L18 24Z" fill="#fff" />
             </svg>

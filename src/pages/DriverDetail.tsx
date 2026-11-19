@@ -80,7 +80,7 @@ export function DriverDetail({ id }: { id: string }) {
   if (!driver)
     return (
       <>
-        <Topbar title="Back to drivers" back="/drivers" current="/drivers" />
+        <Topbar title="Back to drivers" back="drivers" current="drivers" />
         <p className="note">Driver not found.</p>
       </>
     );
@@ -96,7 +96,7 @@ export function DriverDetail({ id }: { id: string }) {
 
   return (
     <>
-      <Topbar title="Back to drivers" back="/drivers" current="/drivers" />
+      <Topbar title="Back to drivers" back="drivers" current="drivers" />
       <div className="dlayout">
         <div className="dlayout__left">
           <div className="dhero">
@@ -142,7 +142,7 @@ export function DriverDetail({ id }: { id: string }) {
                     <span>+{racePts} PTS</span>
                   </div>
                 </div>
-                <a className="btn" href={`#/live?d=${driver.id}`} style={{ marginTop: 18 }}>
+                <a className="btn" href={`#live-${driver.id}`} style={{ marginTop: 18 }}>
                   Track live on the map <ArrowRight />
                 </a>
               </div>

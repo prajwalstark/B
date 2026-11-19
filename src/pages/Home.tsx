@@ -20,7 +20,7 @@ export function Home() {
 
   return (
     <>
-      <Topbar title={`${CIRCUIT.grandPrix} 2026`} current="/" />
+      <Topbar title={`${CIRCUIT.grandPrix} 2026`} current="home" />
       <section className="hero">
         <div className="hero__backdrop" />
         <div style={{ position: 'relative' }}>
@@ -57,7 +57,7 @@ export function Home() {
             <div className="card__foot">
               {maxDriver ? (
                 <>
-                  Top speed of the race — <a href={`#/driver/${maxDriver.id}`}>{maxDriver.firstName} {maxDriver.lastName}</a>
+                  Top speed of the race — <a href={`#driver-${maxDriver.id}`}>{maxDriver.firstName} {maxDriver.lastName}</a>
                 </>
               ) : (
                 'Speed trap opens when the lights go out'
@@ -65,7 +65,7 @@ export function Home() {
             </div>
           </div>
 
-          <a href={`#/live?d=${lead.driver.id}`} className="card leader-card">
+          <a href={`#live-${lead.driver.id}`} className="card leader-card">
             <Avatar driver={lead.driver} size={52} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="eyebrow">{engine.finished ? 'Race winner' : 'Race leader'}</div>
@@ -76,7 +76,7 @@ export function Home() {
             <ArrowRight />
           </a>
 
-          <a href="#/live" className="btn btn--red">
+          <a href="#live" className="btn btn--red">
             Open live tracker <ArrowRight />
           </a>
         </div>
@@ -84,7 +84,7 @@ export function Home() {
         <div style={{ display: 'grid', gap: 16 }}>
           <div className="card mini-tower">
             {engine.order.slice(0, 5).map((c) => (
-              <a key={c.driver.id} className="mini-row" href={`#/driver/${c.driver.id}`}>
+              <a key={c.driver.id} className="mini-row" href={`#driver-${c.driver.id}`}>
                 <span className="tnum" style={{ fontWeight: 600 }}>
                   P{c.position}
                 </span>
@@ -124,7 +124,7 @@ export function Home() {
 
       <section className="section">
         <h2 className="section__title">
-          Race control <a href="#/live">Full timing →</a>
+          Race control <a href="#live">Full timing →</a>
         </h2>
         <Feed engine={engine} limit={6} />
       </section>

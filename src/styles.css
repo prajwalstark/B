@@ -66,9 +66,18 @@ a {
   padding: 0 0 48px;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 31;
+  background: #2b2d31;
+}
+
 .topbar {
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 30;
   display: flex;
   align-items: center;
@@ -1275,4 +1284,12 @@ a {
   height: 26%;
   background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.12) 30%, rgba(255, 255, 255, 0.03) 60%, rgba(255, 255, 255, 0.1) 100%);
   filter: blur(14px);
+}
+
+.tower__driver small.up {
+  color: var(--green);
+}
+
+.tower__driver small.down {
+  color: var(--red-2);
 }

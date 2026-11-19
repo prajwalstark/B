@@ -5,11 +5,11 @@ import { Drivers } from './pages/Drivers';
 import { DriverDetail } from './pages/DriverDetail';
 
 export default function App() {
-  const { path, query } = useRoute();
-  let page;
-  if (path[0] === 'live') page = <Live focus={query.get('d')} />;
-  else if (path[0] === 'drivers') page = <Drivers />;
-  else if (path[0] === 'driver' && path[1]) page = <DriverDetail id={path[1]} />;
-  else page = <Home />;
-  return <div className="app">{page}</div>;
+  const { page, id } = useRoute();
+  let view;
+  if (page === 'live') view = <Live focus={id} />;
+  else if (page === 'drivers') view = <Drivers />;
+  else if (page === 'driver' && id) view = <DriverDetail id={id} />;
+  else view = <Home />;
+  return <div className="app">{view}</div>;
 }

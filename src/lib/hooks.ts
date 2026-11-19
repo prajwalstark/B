@@ -24,14 +24,19 @@ export function useFrame() {
 }
 
 export interface Route {
-  path: string[];
-  query: URLSearchParams;
+  /** Page name: home | live | drivers | driver */
+  page: string;
+  /** Driver id for `live-<id>` and `driver-<id>` */
+  id: string | null;
 }
 
+// Routes are plain hash names (#live, #live-leclerc, #driver-ocon) so links survive any host.
 function parse(): Route {
-  const raw = window.location.hash.replace(/^#/, '') || '/';
-  const [p, q = ''] = raw.split('?');
-  return { path: p.split('/').filter(Boolean), query: new URLSearchParams(q) };
+  const raw = decodeURIComponent(window.location.hash.replace(/^#\/?/, '')) || 'home';
+  const m = raw.match(/^(live|driver)-([a-z0-9-]+)$/);
+  if (m) return { page: m[1], id: m[2] };
+  if (raw === 'live' || raw === 'drivers') return { page: raw, id: null };
+  return { page: 'home', id: null };
 }
 
 export function useRoute(): Route {
@@ -40,7 +45,7 @@ export function useRoute(): Route {
     const on = () => {
       const next = parse();
       setRoute((prev) => {
-        if (prev.path.join('/') !== next.path.join('/')) window.scrollTo({ top: 0 });
+        if (prev.page !== next.page || (prev.page === 'driver' && prev.id !== next.id)) window.scrollTo({ top: 0 });
         return next;
       });
     };

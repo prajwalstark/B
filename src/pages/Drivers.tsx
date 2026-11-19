@@ -30,7 +30,7 @@ export function Drivers() {
 
   return (
     <>
-      <Topbar title="Drivers" back="/" current="/drivers" />
+      <Topbar title="Drivers" back="home" current="drivers" />
       <div className="drivers-head">
         <div className="eyebrow">2026 grid · 11 teams</div>
         <h1>The Grid</h1>
@@ -59,7 +59,7 @@ export function Drivers() {
           const t = TEAMS[d.teamId];
           const car = engine.carById(d.id);
           return (
-            <a key={d.id} className="dcard" href={`#/driver/${d.id}`}>
+            <a key={d.id} className="dcard" href={`#driver-${d.id}`}>
               <div
                 className="dcard__glow"
                 style={{ background: `radial-gradient(120% 90% at 85% 60%, ${t.color}55 0%, rgba(0,0,0,0) 60%), linear-gradient(160deg, #34373c 0%, #1d1f22 70%)` }}

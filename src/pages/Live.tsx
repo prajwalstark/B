@@ -17,7 +17,7 @@ export function Live({ focus }: { focus: string | null }) {
   const [labels, setLabels] = useState<'top' | 'all' | 'none'>('top');
   const selected = focus && engine.carById(focus) ? focus : engine.order[0].driver.id;
   const car = engine.carById(selected)!;
-  const select = (id: string) => navigate(`/live?d=${id}`);
+  const select = (id: string) => navigate(`live-${id}`);
 
   const lapShown = car.status === 'FIN' || car.status === 'OUT' ? car.lastLap : car.status === 'GRID' ? 0 : car.currentLap;
   const [main, ms] = splitLap(lapShown);
@@ -26,7 +26,7 @@ export function Live({ focus }: { focus: string | null }) {
 
   return (
     <>
-      <Topbar title="Race tracker" back="/" current="/live" />
+      <Topbar title="Race tracker" back="home" current="live" />
       <div className="live">
         <div style={{ display: 'grid', gap: 12 }}>
           <div className="focusbar">
@@ -80,7 +80,7 @@ export function Live({ focus }: { focus: string | null }) {
               </div>
             </div>
             <Helmet driver={car.driver} className="lapcard__art" />
-            <a className="lapcard__foot" href={`#/driver/${car.driver.id}`}>
+            <a className="lapcard__foot" href={`#driver-${car.driver.id}`}>
               <Flag country={car.driver.country} size={18} />
               {car.driver.firstName} {car.driver.lastName}
               <span style={{ marginLeft: 'auto', color: 'var(--muted)', fontSize: 13 }}>Profile →</span>
