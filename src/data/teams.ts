@@ -1,0 +1,151 @@
+export interface Team {
+  id: string;
+  name: string;
+  fullName: string;
+  color: string;
+  accent: string;
+  powerUnit: string;
+  base: string;
+  /** Relative car performance used by the race simulator (1 = fastest). */
+  carPace: number;
+}
+
+export const TEAMS: Record<string, Team> = {
+  mclaren: {
+    id: 'mclaren',
+    name: 'McLaren',
+    fullName: 'McLaren Formula 1 Team',
+    color: '#FF8000',
+    accent: '#47C7FC',
+    powerUnit: 'Mercedes',
+    base: 'Woking, United Kingdom',
+    carPace: 1.0,
+  },
+  mercedes: {
+    id: 'mercedes',
+    name: 'Mercedes',
+    fullName: 'Mercedes-AMG Petronas F1 Team',
+    color: '#27F4D2',
+    accent: '#C0C0C0',
+    powerUnit: 'Mercedes',
+    base: 'Brackley, United Kingdom',
+    carPace: 1.0005,
+  },
+  ferrari: {
+    id: 'ferrari',
+    name: 'Ferrari',
+    fullName: 'Scuderia Ferrari',
+    color: '#E8002D',
+    accent: '#FFEB00',
+    powerUnit: 'Ferrari',
+    base: 'Maranello, Italy',
+    carPace: 1.0015,
+  },
+  redbull: {
+    id: 'redbull',
+    name: 'Red Bull Racing',
+    fullName: 'Oracle Red Bull Racing',
+    color: '#3671C6',
+    accent: '#FFD200',
+    powerUnit: 'Red Bull Ford',
+    base: 'Milton Keynes, United Kingdom',
+    carPace: 1.002,
+  },
+  williams: {
+    id: 'williams',
+    name: 'Williams',
+    fullName: 'Atlassian Williams Racing',
+    color: '#1868DB',
+    accent: '#00A0DE',
+    powerUnit: 'Mercedes',
+    base: 'Grove, United Kingdom',
+    carPace: 1.005,
+  },
+  astonmartin: {
+    id: 'astonmartin',
+    name: 'Aston Martin',
+    fullName: 'Aston Martin Aramco F1 Team',
+    color: '#229971',
+    accent: '#CEDC00',
+    powerUnit: 'Honda',
+    base: 'Silverstone, United Kingdom',
+    carPace: 1.0065,
+  },
+  racingbulls: {
+    id: 'racingbulls',
+    name: 'Racing Bulls',
+    fullName: 'Visa Cash App Racing Bulls',
+    color: '#6692FF',
+    accent: '#FFFFFF',
+    powerUnit: 'Red Bull Ford',
+    base: 'Faenza, Italy',
+    carPace: 1.0062,
+  },
+  haas: {
+    id: 'haas',
+    name: 'Haas',
+    fullName: 'MoneyGram Haas F1 Team',
+    color: '#B6BABD',
+    accent: '#E10600',
+    powerUnit: 'Ferrari',
+    base: 'Kannapolis, United States',
+    carPace: 1.007,
+  },
+  alpine: {
+    id: 'alpine',
+    name: 'Alpine',
+    fullName: 'BWT Alpine F1 Team',
+    color: '#0093CC',
+    accent: '#FF87BC',
+    powerUnit: 'Mercedes',
+    base: 'Enstone, United Kingdom',
+    carPace: 1.008,
+  },
+  audi: {
+    id: 'audi',
+    name: 'Audi',
+    fullName: 'Audi F1 Team',
+    color: '#F50537',
+    accent: '#8A8D8F',
+    powerUnit: 'Audi',
+    base: 'Hinwil, Switzerland',
+    carPace: 1.0085,
+  },
+  cadillac: {
+    id: 'cadillac',
+    name: 'Cadillac',
+    fullName: 'Cadillac F1 Team',
+    color: '#C9B37E',
+    accent: '#FFFFFF',
+    powerUnit: 'Ferrari',
+    base: 'Fishers, United States',
+    carPace: 1.011,
+  },
+};
+
+/** Historic team colours used in the season-by-season history views. */
+export const HISTORIC_TEAM_COLORS: Record<string, string> = {
+  'Toro Rosso': '#469BFF',
+  AlphaTauri: '#4E7C9B',
+  RB: '#6692FF',
+  'Racing Bulls': '#6692FF',
+  'Red Bull': '#3671C6',
+  'Red Bull Racing': '#3671C6',
+  Ferrari: '#E8002D',
+  McLaren: '#FF8000',
+  Mercedes: '#27F4D2',
+  Williams: '#1868DB',
+  Sauber: '#52E252',
+  'Kick Sauber': '#52E252',
+  'Alfa Romeo': '#C92D4B',
+  Renault: '#FFF500',
+  Alpine: '#0093CC',
+  Minardi: '#3B3B3B',
+  'Force India': '#F596C8',
+  'Racing Point': '#F596C8',
+  'Aston Martin': '#229971',
+  Manor: '#ED1C24',
+  Haas: '#B6BABD',
+  Audi: '#F50537',
+  Cadillac: '#C9B37E',
+};
