@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 // Single-file build for hosting: React is loaded from a CDN (UMD globals) and the app ships as one IIFE.
 export default defineConfig({
   plugins: [react()],
+  base: './',
   define: { 'process.env.NODE_ENV': '"production"' },
   build: {
     outDir: 'dist-artifact',
