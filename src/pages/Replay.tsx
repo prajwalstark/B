@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Topbar } from '../components/Topbar';
 import { Flag } from '../components/Avatar';
 import { PauseIcon, PlayIcon } from '../components/Icons';
@@ -256,6 +256,11 @@ export function ReplayPage() {
   const [key, setKey] = useState<number | null>(null);
   const list = races.data ?? [];
   const session = list.find((s) => s.session_key === key) ?? list[list.length - 1];
+  const pickerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = pickerRef.current?.querySelector('.chip.active') as HTMLElement | null;
+    el?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [session?.session_key]);
 
   return (
     <>
@@ -278,7 +283,7 @@ export function ReplayPage() {
           ))}
         </div>
         {list.length > 0 && (
-          <div className="chips rounds" role="group" aria-label="Choose a race">
+          <div className="chips rounds" role="group" aria-label="Choose a race" ref={pickerRef}>
             {list.map((s) => (
               <button key={s.session_key} className={`chip ${s.session_key === session?.session_key ? 'active' : ''}`} onClick={() => setKey(s.session_key)}>
                 <Flag country={ISO3[s.country_code] ?? s.country_code.slice(0, 2)} size={13} />
