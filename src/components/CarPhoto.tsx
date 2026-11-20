@@ -7,6 +7,8 @@ export interface CarPhotoInfo {
   car: string;
   small: string;
   large: string;
+  /** 3840px-wide (4K UHD) version for large high-density screens. */
+  uhd: string;
   width: number;
   height: number;
   /** Horizontal focus point (0–1) so the car stays in frame when cropped. */
@@ -61,7 +63,7 @@ export function CarPhoto({
     <img
       className={`carphoto ${className}`}
       src={url(p.small)}
-      srcSet={`${url(p.small)} 1280w, ${url(p.large)} 2560w`}
+      srcSet={`${url(p.small)} 1280w, ${url(p.large)} 2560w, ${url(p.uhd)} 3840w`}
       sizes={sizes}
       width={p.width}
       height={p.height}
