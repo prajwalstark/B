@@ -175,15 +175,25 @@ export function TrackMap({ selected, onSelect, labels = 'top', top = 5 }: Props)
         items.sort((a, b) => Number(b.c.driver.id === selected) - Number(a.c.driver.id === selected));
         return items.map(({ c, x, y, f }) => {
           const [nx, ny] = c.status === 'RUN' || c.status === 'FIN' ? outward(C, f) : [0, -1];
-          let dist = 26;
-          let lx = x + nx * dist;
-          let ly = y + ny * dist;
-          for (let k = 0; k < 8 && boxes.some((b) => Math.abs(b.x - lx) < bw + 2 && Math.abs(b.y - ly) < bh + 2); k++) {
-            dist += 14;
-            // alternate sideways along the track direction as well as outward
-            const side = (k % 2 === 0 ? 1 : -1) * (bw / 2 + 4) * Math.ceil((k + 1) / 2) * 0.5;
-            lx = x + nx * dist + ny * side;
-            ly = y + ny * dist - nx * side;
+          const inside = (x0: number, y0: number) => x0 > bw / 2 + 2 && x0 < w - bw / 2 - 2 && y0 > bh / 2 + 2 && y0 < h - bh / 2 - 2;
+          const free = (x0: number, y0: number) => !boxes.some((b) => Math.abs(b.x - x0) < bw + 2 && Math.abs(b.y - y0) < bh + 2);
+          // Try spots outward first, then inward, stepping further away and sideways along the track.
+          let lx = x + nx * 26;
+          let ly = y + ny * 26;
+          search: for (let ring = 0; ring < 6; ring++) {
+            for (const dir of [1, -1]) {
+              for (const side of [0, 1, -1]) {
+                const d = 26 + ring * 15;
+                const sx = side * (bw + 4) * (ring > 0 ? 1 : 0.6);
+                const cx = x + nx * d * dir + ny * sx;
+                const cy = y + ny * d * dir - nx * sx;
+                if (inside(cx, cy) && free(cx, cy)) {
+                  lx = cx;
+                  ly = cy;
+                  break search;
+                }
+              }
+            }
           }
           lx = Math.min(w - bw / 2 - 2, Math.max(bw / 2 + 2, lx));
           ly = Math.min(h - bh / 2 - 2, Math.max(bh / 2 + 2, ly));

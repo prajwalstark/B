@@ -88,7 +88,7 @@ export function Home() {
           <a href={`#live-${lead.driver.id}`} className="card leader-card">
             <Avatar driver={lead.driver} size={52} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="eyebrow">{engine.finished ? 'Race winner' : 'Race leader'}</div>
+              <div className="eyebrow">{engine.finished ? 'Race winner' : engine.t < 0 ? 'Pole position' : 'Race leader'}</div>
               <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginTop: 4 }}>
                 <Flag country={lead.driver.country} size={18} /> {lead.driver.firstName} {lead.driver.lastName}
               </div>
@@ -107,7 +107,7 @@ export function Home() {
                   {c.driver.firstName[0]}. {c.driver.lastName}
                 </span>
                 <span className="tnum" style={{ color: 'var(--muted)', display: 'flex', gap: 10, alignItems: 'center' }}>
-                  {c.position === 1 ? 'Leader' : c.status === 'PIT' ? 'PIT' : `+${c.gap.toFixed(3)}`}
+                  {c.status === 'GRID' ? 'Grid' : c.position === 1 ? 'Leader' : c.status === 'PIT' ? 'PIT' : `+${c.gap.toFixed(3)}`}
                   <Tyre compound={c.compound} size={18} />
                 </span>
               </a>

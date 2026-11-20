@@ -58,15 +58,15 @@ export function Live({ focus }: { focus: string | null }) {
             <div className="lapcard__body">
               <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#c8cbcf' }}>
                 Current lap time {delta !== null && <Triangle up={delta <= 0} />}
-                <span style={{ marginLeft: 'auto', marginRight: '40%', color: 'var(--muted)' }} className="tnum">
-                  LAP {lapNo}/{engine.laps}
-                </span>
               </div>
               <div className="bigstat" style={{ marginTop: 10 }}>
                 {main}
                 <span className="soft">{ms}</span>
               </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 13, color: 'var(--muted)', flexWrap: 'wrap' }} className="tnum">
+                <span>
+                  Lap <b style={{ color: 'var(--text)', fontWeight: 500 }}>{lapNo}/{engine.laps}</b>
+                </span>
                 <span>
                   Last <b style={{ color: 'var(--text)', fontWeight: 500 }}>{splitLap(car.lastLap).join('')}</b>
                 </span>
