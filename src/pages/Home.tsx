@@ -3,7 +3,7 @@ import { CALENDAR, heroName, weekendStatus } from '../data/track';
 import { DRIVER_BY_ID } from '../data/drivers';
 import { navigate, useRace } from '../lib/hooks';
 import { Topbar } from '../components/Topbar';
-import { CarArt } from '../components/CarArt';
+import { CarPhoto, PhotoCredit, carPhoto } from '../components/CarPhoto';
 import { CarGlyph, ArrowRight } from '../components/Icons';
 import { Avatar, Flag } from '../components/Avatar';
 import { Feed } from '../components/Feed';
@@ -55,8 +55,9 @@ export function Home() {
             {!engine.finished && <span className="live-dot" />} {status}
           </div>
         </div>
-        <div className="hero__stage">
-          <CarArt color={lead.color} />
+        <div className={`hero__stage ${carPhoto(lead.driver.teamId) ? 'hero__stage--photo' : ''}`}>
+          <CarPhoto teamId={lead.driver.teamId} sizes="(min-width: 1240px) 1240px, 100vw" eager />
+          <PhotoCredit teamId={lead.driver.teamId} className="photo-credit hero__credit" />
         </div>
       </section>
 

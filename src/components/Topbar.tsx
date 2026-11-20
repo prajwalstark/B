@@ -6,6 +6,7 @@ const LINKS = [
   { to: 'home', label: 'Race weekend' },
   { to: 'live', label: 'Live tracker' },
   { to: 'drivers', label: 'Drivers' },
+  { to: 'teams', label: 'Teams & cars' },
   { to: 'standings', label: 'Standings' },
   { to: 'replay', label: 'Race replay · real data' },
 ];

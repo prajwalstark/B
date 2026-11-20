@@ -1549,3 +1549,147 @@ button:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--red);
 }
+
+/* ------------------------------------------------------------ car photos + teams */
+
+.carphoto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-credit {
+  display: block;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--dim);
+}
+
+.photo-credit a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 14px;
+  padding: 18px 16px 0;
+}
+
+.tcard {
+  background: var(--panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: inset 0 3px 0 var(--team);
+  min-width: 0;
+}
+
+.tcard__photo {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  background: radial-gradient(80% 80% at 50% 60%, color-mix(in srgb, var(--team) 35%, transparent), transparent 70%), #1b1d20;
+  overflow: hidden;
+}
+
+.tcard__photo .carart {
+  bottom: 6%;
+  width: 96%;
+}
+
+.tcard__body {
+  padding: 16px 18px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.tcard__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tcard__head h2 {
+  margin: 4px 0 0;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.tcard__champ {
+  text-align: right;
+  display: grid;
+}
+
+.tcard__champ b {
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+
+.tcard__champ span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tcard__drivers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tcard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (min-width: 900px) {
+  .team-grid {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+.hero__stage--photo {
+  margin-top: -40px;
+  height: clamp(260px, 64vw, 520px);
+}
+
+.hero__stage--photo .carphoto {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 22%, #000 72%, transparent 100%);
+}
+
+.hero__credit {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: 52px;
+  z-index: 1;
+  text-align: right;
+  max-width: 70%;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.dhero__car {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(180deg, transparent 8%, #000 40%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 8%, #000 40%, #000 70%, transparent 100%);
+}
+
+.dhero__credit {
+  position: absolute;
+  left: 16px;
+  bottom: 8px;
+  right: 16px;
+  color: rgba(255, 255, 255, 0.55);
+}

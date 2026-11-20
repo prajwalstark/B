@@ -4,6 +4,7 @@ import { HISTORIC_TEAM_COLORS, TEAMS } from '../data/teams';
 import { useRace } from '../lib/hooks';
 import { Topbar } from '../components/Topbar';
 import { Helmet } from '../components/Helmet';
+import { CarPhoto, PhotoCredit, carPhoto } from '../components/CarPhoto';
 import { Flag } from '../components/Avatar';
 import { ChevronIcon, Triangle, ArrowRight } from '../components/Icons';
 import { Tyre } from '../components/Tyre';
@@ -141,8 +142,14 @@ export function DriverDetail({ id }: { id: string }) {
                 background: `radial-gradient(80% 60% at 50% 55%, ${team.color}66 0%, rgba(0,0,0,0) 70%), repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 2px, transparent 2px 38px), linear-gradient(180deg, #50555c 0%, #2b2e33 55%, #1d1f22 100%)`,
               }}
             />
+            {carPhoto(driver.teamId) && (
+              <div className="dhero__car">
+                <CarPhoto teamId={driver.teamId} sizes="(min-width: 900px) 460px, 100vw" eager />
+              </div>
+            )}
             <div className="dhero__num">{driver.number}</div>
             <Helmet driver={driver} className="dhero__helmet" />
+            <PhotoCredit teamId={driver.teamId} className="photo-credit dhero__credit" />
           </div>
           <div className="dpanel">
             <div className="dpanel__head">

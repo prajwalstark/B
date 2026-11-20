@@ -35,7 +35,7 @@ function parse(): Route {
   const raw = decodeURIComponent(window.location.hash.replace(/^#\/?/, '')) || 'home';
   const m = raw.match(/^(live|driver)-([a-z0-9-]+)$/);
   if (m) return { page: m[1], id: m[2] };
-  if (['live', 'drivers', 'standings', 'replay'].includes(raw)) return { page: raw, id: null };
+  if (['live', 'drivers', 'teams', 'standings', 'replay'].includes(raw)) return { page: raw, id: null };
   return { page: 'home', id: null };
 }
 
