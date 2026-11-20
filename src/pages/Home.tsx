@@ -1,36 +1,56 @@
-import { CIRCUIT } from '../data/track';
+import { useEffect, useRef } from 'react';
+import { CALENDAR, heroName, weekendStatus } from '../data/track';
 import { DRIVER_BY_ID } from '../data/drivers';
-import { useRace } from '../lib/hooks';
+import { navigate, useRace } from '../lib/hooks';
 import { Topbar } from '../components/Topbar';
 import { CarArt } from '../components/CarArt';
 import { CarGlyph, ArrowRight } from '../components/Icons';
 import { Avatar, Flag } from '../components/Avatar';
 import { Feed } from '../components/Feed';
+import { TrackMap } from '../components/TrackMap';
 import { formatLap } from '../sim/raceEngine';
 import { Tyre } from '../components/Tyre';
+import { hex, rosterDriver, useStandings } from '../data/openf1';
+
+function raceDay(iso: string) {
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
 
 export function Home() {
   const engine = useRace();
+  const C = engine.circuit;
   const lead = engine.order[0];
   const max = engine.maxSpeed;
   const maxDriver = max ? DRIVER_BY_ID[max.driverId] : null;
   const [whole, dec] = (max ? max.kmh : 0).toFixed(1).split('.');
-  const status = engine.finished ? 'RACE FINISHED' : engine.t < 0 ? 'LIGHTS OUT IN ' + Math.ceil(-engine.t) : `LIVE — RACE · LAP ${engine.leaderLap()}/${engine.laps}`;
+  const wk = weekendStatus(C);
+  const status = engine.finished ? 'Simulated race finished' : engine.t < 0 ? 'Lights out in ' + Math.ceil(-engine.t) : `Live simulation · Lap ${engine.leaderLap()}/${engine.laps}`;
   const fl = engine.fastest;
+  const standings = useStandings();
+
+  // keep the selected round in view in the picker
+  const pickerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = pickerRef.current?.querySelector('.chip.active') as HTMLElement | null;
+    el?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [C.id]);
 
   return (
     <>
-      <Topbar title={`${CIRCUIT.grandPrix} 2026`} current="home" />
+      <Topbar title={C.grandPrix} current="home" />
       <section className="hero">
         <div className="hero__backdrop" />
         <div style={{ position: 'relative' }}>
           <div className="hero__meta">
-            <span>Round 21</span>
+            <span>Round {C.round}</span>
             <span className="sep">·</span>
-            <Flag country="BR" size={13} />
-            <span>{CIRCUIT.city}</span>
+            <Flag country={C.country} size={13} />
+            <span>{C.location}</span>
+            <span className="sep">·</span>
+            <span>{raceDay(C.raceDate)}</span>
+            {wk === 'this-weekend' && <span className="wk-badge">This weekend</span>}
           </div>
-          <h1 className="hero__title">Interlagos</h1>
+          <h1 className="hero__title">{heroName(C)}</h1>
           <div className="hero__status">
             {!engine.finished && <span className="live-dot" />} {status}
           </div>
@@ -76,12 +96,6 @@ export function Home() {
             <ArrowRight />
           </a>
 
-          <a href="#live" className="btn btn--red">
-            Open live tracker <ArrowRight />
-          </a>
-        </div>
-
-        <div style={{ display: 'grid', gap: 16 }}>
           <div className="card mini-tower">
             {engine.order.slice(0, 5).map((c) => (
               <a key={c.driver.id} className="mini-row" href={`#driver-${c.driver.id}`}>
@@ -99,28 +113,98 @@ export function Home() {
               </a>
             ))}
           </div>
-          <div className="card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, background: 'var(--line)' }}>
-            <div className="stat">
-              <div className="stat__k" style={{ marginTop: 0, marginBottom: 8 }}>
-                Fastest lap
+        </div>
+
+        <div style={{ display: 'grid', gap: 16 }}>
+          <div className="card circuit-card">
+            <div className="circuit-card__head">
+              <div>
+                <div className="eyebrow">Circuit</div>
+                <div className="circuit-card__name">{C.circuit}</div>
               </div>
-              <div className="stat__v purple tnum" style={{ fontSize: 26 }}>
-                {formatLap(fl?.time)}
-              </div>
-              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>{fl ? `${DRIVER_BY_ID[fl.driverId].lastName} · Lap ${fl.lap}` : 'Not set yet'}</div>
+              <a className="ctrl" href={`#live-${lead.driver.id}`}>
+                Track live <ArrowRight size={14} />
+              </a>
             </div>
-            <div className="stat">
-              <div className="stat__k" style={{ marginTop: 0, marginBottom: 8 }}>
-                Circuit
+            <div className="circuit-card__map" onClick={() => navigate(`live-${lead.driver.id}`)}>
+              <TrackMap selected={null} onSelect={(id) => navigate(`live-${id}`)} labels="top" top={3} />
+            </div>
+            <div className="facts tnum">
+              <div>
+                <b>{C.lengthKm.toFixed(3)}</b>
+                <span>km lap</span>
               </div>
-              <div className="stat__v tnum" style={{ fontSize: 26 }}>
-                {CIRCUIT.lengthKm.toFixed(3)} <span style={{ fontSize: 14, color: 'var(--muted)' }}>km</span>
+              <div>
+                <b>{C.laps}</b>
+                <span>laps</span>
               </div>
-              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>{CIRCUIT.laps} laps · Sprint weekend</div>
+              <div>
+                <b>{(C.lengthKm * C.laps).toFixed(1)}</b>
+                <span>km race</span>
+              </div>
+              <div>
+                <b className="purple">{formatLap(fl?.time)}</b>
+                <span>{fl ? `Fastest · ${DRIVER_BY_ID[fl.driverId].code}` : 'Fastest lap'}</span>
+              </div>
+            </div>
+            <div className="card__foot" style={{ fontSize: 13, color: 'var(--muted)' }}>
+              {C.sprint ? 'Sprint weekend · ' : ''}Outline traced from real car-position data
             </div>
           </div>
         </div>
       </div>
+
+      <section className="section">
+        <h2 className="section__title">2026 race weekends</h2>
+        <div className="chips rounds" ref={pickerRef} role="group" aria-label="Choose a Grand Prix to simulate">
+          {CALENDAR.map((r) => {
+            const st = weekendStatus(r);
+            return (
+              <button key={r.id} className={`chip ${r.id === C.id ? 'active' : ''}`} onClick={() => engine.setCircuit(r.id)} title={r.grandPrix}>
+                <span className="tnum" style={{ opacity: 0.6 }}>
+                  R{r.round}
+                </span>
+                <Flag country={r.country} size={13} />
+                {heroName(r)}
+                {st === 'this-weekend' && <span className="live-dot" style={{ width: 6, height: 6 }} />}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="section">
+        <h2 className="section__title">
+          Championship · real 2026 data <a href="#standings">Full standings →</a>
+        </h2>
+        {standings.loading && <div className="card empty">Loading standings from OpenF1…</div>}
+        {standings.error && <div className="card empty">{standings.error}</div>}
+        {standings.data && (
+          <a className="card mini-tower" href="#standings">
+            {standings.data.drivers.slice(0, 3).map((d) => {
+              const rd = rosterDriver(d.driver_number);
+              return (
+                <span key={d.driver_number} className="mini-row">
+                  <span className="tnum" style={{ fontWeight: 600 }}>
+                    P{d.position_current}
+                  </span>
+                  <span className="teambar" style={{ background: hex(d.info?.team_colour) }} />
+                  <span>{rd ? `${rd.firstName} ${rd.lastName}` : d.info?.full_name ?? `#${d.driver_number}`}</span>
+                  <span className="tnum" style={{ fontWeight: 600 }}>
+                    {d.points_current} <span style={{ color: 'var(--muted)', fontWeight: 400 }}>pts</span>
+                  </span>
+                </span>
+              );
+            })}
+            <span className="card__foot" style={{ display: 'block', fontSize: 13, color: 'var(--muted)' }}>
+              After round {standings.data.round} · {standings.data.session.location}
+            </span>
+          </a>
+        )}
+        <a href="#replay" className="btn" style={{ marginTop: 12 }}>
+          Replay a real race <ArrowRight />
+        </a>
+      </section>
 
       <section className="section">
         <h2 className="section__title">
@@ -128,6 +212,9 @@ export function Home() {
         </h2>
         <Feed engine={engine} limit={6} />
       </section>
+      <p className="note">
+        The race on this page is simulated at the real {C.circuit} circuit. Championship standings and race replays use real timing data from OpenF1.
+      </p>
     </>
   );
 }

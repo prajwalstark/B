@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CIRCUIT } from '../data/track';
 import { navigate, useRace } from '../lib/hooks';
 import { Topbar } from '../components/Topbar';
 import { TrackMap } from '../components/TrackMap';
@@ -26,7 +25,7 @@ export function Live({ focus }: { focus: string | null }) {
 
   return (
     <>
-      <Topbar title="Race tracker" back="home" current="live" />
+      <Topbar title={`Race tracker · ${engine.circuit.circuit}`} back="home" current="live" />
       <div className="live">
         <div style={{ display: 'grid', gap: 12 }}>
           <div className="focusbar">
@@ -108,8 +107,9 @@ export function Live({ focus }: { focus: string | null }) {
         </div>
       </div>
       <p className="note">
-        {CIRCUIT.name} · schematic layout. Timing is produced by an in-browser race model (tyre wear, fuel, traffic, pit stops, retirements) — tap
-        any car on the map or row in the tower to track that driver.
+        {engine.circuit.grandPrix} · {engine.circuit.circuit}. The layout is traced from real car-position data; timing comes from an in-browser race
+        model (tyre wear, fuel, traffic, pit stops, retirements). Tap any car on the map or row in the tower to track that driver. For real timing, open{' '}
+        <a href="#replay" style={{ textDecoration: 'underline' }}>Race replay</a>.
       </p>
     </>
   );

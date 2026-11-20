@@ -10,6 +10,7 @@ import { Tyre } from '../components/Tyre';
 import { Feed } from '../components/Feed';
 import { formatLap } from '../sim/raceEngine';
 import { formatDate, ordinal } from '../lib/format';
+import { useStandings } from '../data/openf1';
 
 function HistoryChart({ driver }: { driver: Driver }) {
   const seasons = driver.seasons;
@@ -73,6 +74,39 @@ function HistoryChart({ driver }: { driver: Driver }) {
   );
 }
 
+function Season2026({ number }: { number: number }) {
+  const { data, error, loading } = useStandings();
+  const row = data?.drivers.find((d) => d.driver_number === number);
+  return (
+    <section className="section">
+      <h2 className="section__title">
+        2026 championship · real data <a href="#standings">Standings →</a>
+      </h2>
+      {loading && <div className="card empty">Loading from OpenF1…</div>}
+      {error && <div className="card empty">{error}</div>}
+      {data && !row && <div className="card empty">No 2026 championship entry for this driver yet.</div>}
+      {data && row && (
+        <div className="telemetry">
+          <div className="stat">
+            <div className="stat__v tnum">P{row.position_current}</div>
+            <div className="stat__k">Championship</div>
+          </div>
+          <div className="stat">
+            <div className="stat__v tnum">{row.points_current}</div>
+            <div className="stat__k">Points</div>
+          </div>
+          <div className="stat">
+            <div className={`stat__v tnum ${row.points_start !== null && row.points_current > row.points_start ? 'up' : ''}`}>
+              {row.points_start === null ? '—' : `+${row.points_current - row.points_start}`}
+            </div>
+            <div className="stat__k">At {data.session.location}</div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 export function DriverDetail({ id }: { id: string }) {
   const engine = useRace();
   const [open, setOpen] = useState(true);
@@ -91,6 +125,7 @@ export function DriverDetail({ id }: { id: string }) {
   const total = (sprint?.points ?? 0) + racePts;
   const gained = car.grid - car.position;
   const c = driver.career;
+  const isSprint = engine.circuit.sprint;
   const winRate = c.starts ? ((c.wins / c.starts) * 100).toFixed(1) : '0.0';
   const podRate = c.starts ? ((c.podiums / c.starts) * 100).toFixed(1) : '0.0';
 
@@ -121,7 +156,7 @@ export function DriverDetail({ id }: { id: string }) {
             </div>
             <div className="collapse" style={{ maxHeight: open ? 600 : 0 }}>
               <div style={{ padding: '10px 20px 20px' }}>
-                <div className="eyebrow">Race weekend points</div>
+                <div className="eyebrow">Race weekend points · {engine.circuit.circuit} (simulated)</div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 8 }}>
                   <div className="points-big">
                     {total} <span className="soft">PTS</span>
@@ -129,11 +164,19 @@ export function DriverDetail({ id }: { id: string }) {
                   {car.status === 'RUN' && gained !== 0 && <Triangle up={gained > 0} size={14} />}
                 </div>
                 <div style={{ marginTop: 18 }}>
-                  <div className="prow tnum" style={{ color: 'var(--green)' }}>
-                    <span className="prow__label">Sprint</span>
-                    <span>P{sprint?.pos}</span>
-                    <span>+{sprint?.points ?? 0} PTS</span>
-                  </div>
+                  {isSprint ? (
+                    <div className="prow tnum" style={{ color: 'var(--green)' }}>
+                      <span className="prow__label">Sprint</span>
+                      <span>P{sprint?.pos}</span>
+                      <span>+{sprint?.points ?? 0} PTS</span>
+                    </div>
+                  ) : (
+                    <div className="prow tnum" style={{ color: 'var(--green)' }}>
+                      <span className="prow__label">Qualifying</span>
+                      <span>P{car.grid}</span>
+                      <span>Grid</span>
+                    </div>
+                  )}
                   <div className="prow tnum" style={{ color: car.status === 'OUT' ? 'var(--red-2)' : '#d8dadd' }}>
                     <span className="prow__label">
                       Race {car.status === 'RUN' || car.status === 'PIT' ? <span className="live-dot" style={{ marginLeft: 6, width: 6, height: 6 }} /> : null}
@@ -189,6 +232,8 @@ export function DriverDetail({ id }: { id: string }) {
               </div>
             </div>
           </section>
+
+          <Season2026 number={driver.number} />
 
           <section className="section">
             <h2 className="section__title">Career · through 2025</h2>
@@ -268,7 +313,7 @@ export function DriverDetail({ id }: { id: string }) {
       </div>
       <p className="note">
         Career statistics and season history are compiled through the end of the 2025 season and may contain small inaccuracies. Race weekend
-        points and telemetry come from the in-app race simulation. Helmet artwork is an original illustration in team colours.
+        points and telemetry come from the in-app race simulation; the 2026 championship figures are real data from OpenF1. Helmet artwork is an original illustration in team colours.
       </p>
     </>
   );

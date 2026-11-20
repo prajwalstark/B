@@ -6,7 +6,7 @@ import './styles.css';
 
 // Start the race immediately and fast-forward a little so the page opens mid-race.
 const engine = getEngine();
-engine.skip(5 + 72.4 * 6);
+engine.skip(5 + engine.circuit.referenceLap * 6);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
