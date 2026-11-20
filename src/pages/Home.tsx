@@ -31,8 +31,10 @@ export function Home() {
   // keep the selected round in view in the picker
   const pickerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const el = pickerRef.current?.querySelector('.chip.active') as HTMLElement | null;
-    el?.scrollIntoView({ block: 'nearest', inline: 'center' });
+    // scroll only the picker row sideways (never the page) so the selected chip is centred
+    const row = pickerRef.current;
+    const el = row?.querySelector('.chip.active') as HTMLElement | null;
+    if (row && el) row.scrollLeft = el.offsetLeft - row.offsetLeft - row.clientWidth / 2 + el.clientWidth / 2;
   }, [C.id]);
 
   return (

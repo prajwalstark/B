@@ -258,8 +258,10 @@ export function ReplayPage() {
   const session = list.find((s) => s.session_key === key) ?? list[list.length - 1];
   const pickerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const el = pickerRef.current?.querySelector('.chip.active') as HTMLElement | null;
-    el?.scrollIntoView({ block: 'nearest', inline: 'center' });
+    // scroll only the picker row sideways (never the page) so the selected chip is centred
+    const row = pickerRef.current;
+    const el = row?.querySelector('.chip.active') as HTMLElement | null;
+    if (row && el) row.scrollLeft = el.offsetLeft - row.offsetLeft - row.clientWidth / 2 + el.clientWidth / 2;
   }, [session?.session_key]);
 
   return (

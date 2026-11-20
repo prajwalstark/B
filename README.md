@@ -31,7 +31,29 @@ A mobile-first Formula 1 race tracker with a live track map, timing tower and a 
   overtaking on straights, pit stops and retirements. Gaps and deltas use 200 mini-sectors per lap.
 - **Driver careers** — `src/data/drivers.ts`, compiled through the end of the 2025 season; may contain small inaccuracies.
 
-Helmet and car artwork are original illustrations — no team or series logos are used.
+- **Car photos** — real photos of each team's 2026 car from Wikimedia Commons under free licences (see below), in
+  `public/cars/` at 1280, 2560 and 3840 px wide (4K UHD); browsers load only the size the screen needs.
+
+Helmet artwork is an original illustration in team colours.
+
+## Photo credits
+
+The car photos were cropped to 2:1 and resized from the originals on Wikimedia Commons. They remain under their
+original licences (CC BY-SA 4.0 adaptations are shared under the same licence), and each is credited in the app under the photo.
+
+| Car | Original | Photographer | Licence |
+|---|---|---|---|
+| Mercedes W17 | [FIA F1 Austria 2026 Nr. 63 Russell (1).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._63_Russell_(1).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Ferrari SF-26 | [2026 Bahrain GP - Ferrari - Lewis Hamilton - Qualifying.jpg](https://commons.wikimedia.org/wiki/File:2026_Bahrain_GP_-_Ferrari_-_Lewis_Hamilton_-_Qualifying.jpg) | Liauzh | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Red Bull Racing RB22 | [FIA F1 Austria 2026 Nr. 3 Verstappen (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._3_Verstappen_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| McLaren MCL40 | [FIA F1 Austria 2026 Nr. 1 Norris (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._1_Norris_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Aston Martin AMR26 | [FIA F1 Austria 2026 Nr. 14 Alonso (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._14_Alonso_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Williams FW48 | [FIA F1 Austria 2026 Nr. 23 Albon (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._23_Albon_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Racing Bulls VCARB 03 | [FIA F1 Austria 2026 Nr. 30 Lawson (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._30_Lawson_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Haas VF-26 | [FIA F1 Austria 2026 Nr. 31 Ocon (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._31_Ocon_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Alpine A526 | [FIA F1 Austria 2026 Nr. 10 Gasly (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._10_Gasly_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Audi R26 | [FIA F1 Austria 2026 Nr. 27 Hülkenberg (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._27_H%C3%BClkenberg_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| Cadillac MAC-26 | [FIA F1 Austria 2026 Nr. 11 Perez (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._11_Perez_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 
 ## Run it
 
