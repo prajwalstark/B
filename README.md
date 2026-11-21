@@ -55,6 +55,11 @@ original licences (CC BY-SA 4.0 adaptations are shared under the same licence), 
 | Audi R26 | [FIA F1 Austria 2026 Nr. 27 Hülkenberg (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._27_H%C3%BClkenberg_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | Cadillac MAC-26 | [FIA F1 Austria 2026 Nr. 11 Perez (3).jpg](https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2026_Nr._11_Perez_(3).jpg) | Lukas Raich | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 
+## Live site
+
+The app is published to **https://prajwalstark.github.io/B/** by `.github/workflows/deploy-pages.yml` on every push
+to `main`. One-time setup: in the repo's **Settings → Pages**, set **Source** to **GitHub Actions**.
+
 ## Run it
 
 ```bash

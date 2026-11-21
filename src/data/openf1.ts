@@ -148,7 +148,7 @@ export function friendlyError(e: unknown): string {
   if (msg === 'LIVE_LOCK')
     return 'A Formula 1 session is live right now, and OpenF1 only serves its data to paid subscribers until it ends. Real standings and replays will load again after the session — usually within an hour or two.';
   if (/Failed to fetch|NetworkError|Load failed|blocked/i.test(msg))
-    return 'Could not load real data from OpenF1 (api.openf1.org). Two common reasons: a Formula 1 session is live right now (OpenF1 limits free access until it ends — try again afterwards), or this page cannot reach outside sites (the published claude.ai preview blocks them — run the app with `npm run dev` instead).';
+    return 'Could not load real data from OpenF1 (api.openf1.org). Two common reasons: a Formula 1 session is live right now (OpenF1 limits free access until it ends — try again afterwards), or this page cannot reach outside sites (the claude.ai preview blocks them — open the full app at prajwalstark.github.io/B instead).';
   return msg;
 }
 
