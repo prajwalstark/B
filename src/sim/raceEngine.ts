@@ -1,4 +1,4 @@
-import { CIRCUIT, sampleAt } from '../data/track';
+import { currentRoundId, getCircuit, sampleAt, type Circuit } from '../data/track';
 import { DRIVERS, type Driver } from '../data/drivers';
 import { TEAMS } from '../data/teams';
 
@@ -15,8 +15,6 @@ export const RACE_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 export const SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1];
 
 const MARKERS = 200; // mini-sectors per lap used for live gaps & deltas
-const LAP_M = CIRCUIT.lengthKm * 1000;
-const MARK_M = LAP_M / MARKERS;
 const MIN_GAP_M = 7;
 const PIT_SPEED = 22;
 
@@ -86,7 +84,10 @@ function mulberry32(seed: number) {
 type Listener = () => void;
 
 export class RaceEngine {
-  laps = CIRCUIT.laps;
+  circuit: Circuit;
+  laps: number;
+  lapM: number;
+  markM: number;
   t = 0; // race seconds since lights out (negative during countdown)
   speed = 1;
   paused = false;
@@ -108,11 +109,25 @@ export class RaceEngine {
   private lastEmit = 0;
   private eventId = 0;
 
-  constructor(seed = Date.now() % 100000) {
+  constructor(seed = Date.now() % 100000, circuitId = currentRoundId()) {
     this.seed = seed;
     this.rng = mulberry32(seed);
+    this.circuit = getCircuit(circuitId);
+    this.laps = this.circuit.laps;
+    this.lapM = this.circuit.lengthKm * 1000;
+    this.markM = this.lapM / MARKERS;
     this.firstCross = new Float64Array((this.laps + 3) * MARKERS).fill(NaN);
     this.setup();
+  }
+
+  /** Switch the weekend to another circuit on the calendar and start a fresh race there. */
+  setCircuit(id: string) {
+    this.circuit = getCircuit(id);
+    this.laps = this.circuit.laps;
+    this.lapM = this.circuit.lengthKm * 1000;
+    this.markM = this.lapM / MARKERS;
+    this.firstCross = new Float64Array((this.laps + 3) * MARKERS);
+    this.reset();
   }
 
   /** Re-run the weekend with a new random seed (new grid, strategies & incidents). */
@@ -132,7 +147,8 @@ export class RaceEngine {
   /* ---------------------------------------------------------------- setup */
 
   private basePace(d: Driver) {
-    return TEAMS[d.teamId].carPace * d.skill;
+    // Car performance dominates; driver skill shifts it by up to ~0.2%.
+    return TEAMS[d.teamId].carPace * (1 + (d.skill - 1) * 0.5);
   }
 
   private setup() {
@@ -142,7 +158,9 @@ export class RaceEngine {
 
     // Sprint (already happened on Saturday) – deterministic from the seed
     const sprintGrid = DRIVERS.map((d) => ({ d, q: this.basePace(d) + (r() - 0.5) * 0.005 })).sort((a, b) => a.q - b.q);
-    this.sprint = sprintGrid
+    this.sprint = !this.circuit.sprint
+      ? []
+      : sprintGrid
       .map((s, i) => ({ d: s.d, grid: i + 1, score: s.q + (r() - 0.5) * 0.004 }))
       .sort((a, b) => a.score - b.score)
       .map((s, i) => ({ driverId: s.d.id, pos: i + 1, grid: s.grid, points: SPRINT_POINTS[i] ?? 0 }));
@@ -158,7 +176,7 @@ export class RaceEngine {
             { lap: 44 + Math.floor(r() * 8), to: (r() < 0.5 ? 'SOFT' : 'MEDIUM') as Compound },
           ]
         : [{ lap: (start === 'SOFT' ? 20 : start === 'HARD' ? 38 : 28) + Math.floor(r() * 9), to: (start === 'HARD' ? 'MEDIUM' : 'HARD') as Compound }];
-      const dnf = r() < 0.045 ? (2 + r() * (this.laps - 4)) * LAP_M : null;
+      const dnf = r() < 0.045 ? (2 + r() * (this.laps - 4)) * this.lapM : null;
       const car: Car = {
         driver: d,
         color: TEAMS[d.teamId].color,
@@ -207,7 +225,7 @@ export class RaceEngine {
     const c = COMPOUNDS[car.compound];
     const fuel = 0.032 * (this.laps - completed);
     const noise = (this.rng() - 0.5) * 0.45;
-    return CIRCUIT.referenceLap * this.basePace(car.driver) + c.offset + c.deg * Math.pow(car.tyreAge, 1.25) + fuel + noise;
+    return this.circuit.referenceLap * this.basePace(car.driver) + c.offset + c.deg * Math.pow(car.tyreAge, 1.25) + fuel + noise;
   }
 
   /* ------------------------------------------------------------- loop api */
@@ -272,7 +290,7 @@ export class RaceEngine {
 
   leaderLap() {
     const lead = this.order[0];
-    return Math.max(1, Math.min(this.laps, Math.floor(Math.max(0, lead.dist) / LAP_M) + 1));
+    return Math.max(1, Math.min(this.laps, Math.floor(Math.max(0, lead.dist) / this.lapM) + 1));
   }
 
   private push(kind: RaceEvent['kind'], text: string, driverId?: string) {
@@ -313,9 +331,10 @@ export class RaceEngine {
         continue;
       }
 
-      const frac = ((car.dist % LAP_M) + LAP_M) % LAP_M / LAP_M;
-      const s = sampleAt(frac);
-      let v = s.v * (CIRCUIT.referenceLap / car.lapTarget);
+      const L = this.lapM;
+      const frac = (((car.dist % L) + L) % L) / L;
+      const s = sampleAt(this.circuit, frac);
+      let v = s.v * (this.circuit.referenceLap / car.lapTarget);
       // standing start / pit exit launch
       const sinceLaunch = this.t - car.launchAt;
       if (sinceLaunch < 8) v = Math.min(v, (car.launchAt === 0 ? 0 : PIT_SPEED) + 12.5 * sinceLaunch);
@@ -325,7 +344,7 @@ export class RaceEngine {
       // Traffic: car physically ahead on the same lap
       const ahead = this.carAhead(idx);
       if (ahead && next > ahead.dist - MIN_GAP_M) {
-        const straight = s.v > 72;
+        const straight = s.v * 3.6 > this.circuit.topSpeedKmh * 0.8;
         const faster = car.lapTarget < ahead.lapTarget - 0.04;
         if (this.t < car.passingUntil) {
           // committed to the move — carry on
@@ -352,15 +371,15 @@ export class RaceEngine {
         continue;
       }
 
-      const prevLapIdx = Math.floor(car.dist / LAP_M);
+      const prevLapIdx = Math.floor(car.dist / L);
       const from = car.dist;
       this.crossMarkers(car, from, next, prevT, h);
       car.dist = next;
-      const lapIdx = Math.floor(car.dist / LAP_M);
+      const lapIdx = Math.floor(car.dist / L);
 
       // sectors
-      const f2 = ((car.dist % LAP_M) + LAP_M) % LAP_M / LAP_M;
-      const newSector: 1 | 2 | 3 = f2 < CIRCUIT.sectors[0] ? 1 : f2 < CIRCUIT.sectors[1] ? 2 : 3;
+      const f2 = (((car.dist % L) + L) % L) / L;
+      const newSector: 1 | 2 | 3 = f2 < this.circuit.sectors[0] ? 1 : f2 < this.circuit.sectors[1] ? 2 : 3;
       if (car.dist > 0 && newSector !== car.sector) {
         const si = car.sector - 1;
         const st = this.t - car.sectorStart;
@@ -376,7 +395,7 @@ export class RaceEngine {
       car.currentLap = this.t - car.lapStart;
 
       if (lapIdx > prevLapIdx && prevLapIdx >= 0) {
-        const tc = prevT + h * Math.min(1, Math.max(0, (lapIdx * LAP_M - from) / (next - from || 1)));
+        const tc = prevT + h * Math.min(1, Math.max(0, (lapIdx * L - from) / (next - from || 1)));
         this.completeLap(car, lapIdx, this.cars.some((c) => c.status === 'FIN'), tc);
       }
     }
@@ -398,9 +417,9 @@ export class RaceEngine {
 
   private crossMarkers(car: Car, from: number, to: number, t0: number, h: number) {
     if (to < 0) return;
-    const g1 = Math.min(Math.floor(to / MARK_M), this.firstCross.length - 1);
+    const g1 = Math.min(Math.floor(to / this.markM), this.firstCross.length - 1);
     for (let g = car.lastMarker + 1; g <= g1; g++) {
-      const md = g * MARK_M;
+      const md = g * this.markM;
       const frac = to === from ? 1 : (md - from) / (to - from);
       const tc = t0 + h * Math.min(1, Math.max(0, frac));
       if (Number.isNaN(this.firstCross[g])) this.firstCross[g] = tc;
@@ -434,7 +453,7 @@ export class RaceEngine {
       car.status = 'FIN';
       car.finishedAt = tc;
       car.speed = 0;
-      if (!winnerDone) this.push('FINISH', `${car.driver.firstName} ${car.driver.lastName} wins the ${CIRCUIT.grandPrix}!`, car.driver.id);
+      if (!winnerDone) this.push('FINISH', `${car.driver.firstName} ${car.driver.lastName} wins the ${this.circuit.grandPrix}!`, car.driver.id);
       if (this.cars.every((c) => c.status === 'FIN' || c.status === 'OUT')) {
         this.finished = true;
         this.push('INFO', 'Chequered flag — race classified');
@@ -488,7 +507,7 @@ export class RaceEngine {
 
   lapsDown(car: Car) {
     const lead = this.order[0];
-    return Math.max(0, Math.floor((lead.dist - car.dist) / LAP_M));
+    return Math.max(0, Math.floor((lead.dist - car.dist) / this.lapM));
   }
 
   carById(id: string) {
@@ -496,11 +515,12 @@ export class RaceEngine {
   }
 
   lapFraction(car: Car) {
-    return (((car.dist % LAP_M) + LAP_M) % LAP_M) / LAP_M;
+    const L = this.lapM;
+    return (((car.dist % L) + L) % L) / L;
   }
 
   completedLaps(car: Car) {
-    return Math.max(0, Math.floor(car.dist / LAP_M));
+    return Math.max(0, Math.floor(car.dist / this.lapM));
   }
 
   racePoints(car: Car) {

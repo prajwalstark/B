@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { CIRCUIT } from '../data/track';
 import { navigate, useRace } from '../lib/hooks';
 import { Topbar } from '../components/Topbar';
 import { TrackMap } from '../components/TrackMap';
@@ -26,7 +25,7 @@ export function Live({ focus }: { focus: string | null }) {
 
   return (
     <>
-      <Topbar title="Race tracker" back="home" current="live" />
+      <Topbar title={`Race tracker · ${engine.circuit.circuit}`} back="home" current="live" />
       <div className="live">
         <div style={{ display: 'grid', gap: 12 }}>
           <div className="focusbar">
@@ -59,15 +58,15 @@ export function Live({ focus }: { focus: string | null }) {
             <div className="lapcard__body">
               <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#c8cbcf' }}>
                 Current lap time {delta !== null && <Triangle up={delta <= 0} />}
-                <span style={{ marginLeft: 'auto', marginRight: '40%', color: 'var(--muted)' }} className="tnum">
-                  LAP {lapNo}/{engine.laps}
-                </span>
               </div>
               <div className="bigstat" style={{ marginTop: 10 }}>
                 {main}
                 <span className="soft">{ms}</span>
               </div>
               <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 13, color: 'var(--muted)', flexWrap: 'wrap' }} className="tnum">
+                <span>
+                  Lap <b style={{ color: 'var(--text)', fontWeight: 500 }}>{lapNo}/{engine.laps}</b>
+                </span>
                 <span>
                   Last <b style={{ color: 'var(--text)', fontWeight: 500 }}>{splitLap(car.lastLap).join('')}</b>
                 </span>
@@ -108,8 +107,9 @@ export function Live({ focus }: { focus: string | null }) {
         </div>
       </div>
       <p className="note">
-        {CIRCUIT.name} · schematic layout. Timing is produced by an in-browser race model (tyre wear, fuel, traffic, pit stops, retirements) — tap
-        any car on the map or row in the tower to track that driver.
+        {engine.circuit.grandPrix} · {engine.circuit.circuit}. The layout is traced from real car-position data; timing comes from an in-browser race
+        model (tyre wear, fuel, traffic, pit stops, retirements). Tap any car on the map or row in the tower to track that driver. For real timing, open{' '}
+        <a href="#replay" style={{ textDecoration: 'underline' }}>Race replay</a>.
       </p>
     </>
   );

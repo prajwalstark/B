@@ -1,27 +1,34 @@
 import { useMemo } from 'react';
-import { CIRCUIT, sampleAt } from '../data/track';
+import { sampleAt, type Circuit } from '../data/track';
 import { useFrame } from '../lib/hooks';
 import type { Car } from '../sim/raceEngine';
 
-function normalAt(f: number): [number, number] {
-  const a = sampleAt(f - 0.002);
-  const b = sampleAt(f + 0.002);
+function normalAt(c: Circuit, f: number): [number, number] {
+  const a = sampleAt(c, f - 0.002);
+  const b = sampleAt(c, f + 0.002);
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const l = Math.hypot(dx, dy) || 1;
   return [-dy / l, dx / l];
 }
 
-// Centroid used to push labels / dots outward from the circuit.
-const CENTER = (() => {
-  const s = CIRCUIT.samples;
-  return [s.reduce((a, p) => a + p.x, 0) / s.length, s.reduce((a, p) => a + p.y, 0) / s.length];
-})();
+const centers = new Map<string, [number, number]>();
+function centerOf(c: Circuit): [number, number] {
+  let v = centers.get(c.id);
+  if (!v) {
+    const s = c.samples;
+    v = [s.reduce((a, p) => a + p.x, 0) / s.length, s.reduce((a, p) => a + p.y, 0) / s.length];
+    centers.set(c.id, v);
+  }
+  return v;
+}
 
-function outward(f: number): [number, number] {
-  const p = sampleAt(f);
-  const [nx, ny] = normalAt(f);
-  const dot = (p.x - CENTER[0]) * nx + (p.y - CENTER[1]) * ny;
+/** Unit normal pointing away from the circuit's centre — used to push labels off the track. */
+function outward(c: Circuit, f: number): [number, number] {
+  const p = sampleAt(c, f);
+  const [nx, ny] = normalAt(c, f);
+  const [cx, cy] = centerOf(c);
+  const dot = (p.x - cx) * nx + (p.y - cy) * ny;
   return dot >= 0 ? [nx, ny] : [-nx, -ny];
 }
 
@@ -29,58 +36,61 @@ interface Props {
   selected: string | null;
   onSelect: (id: string) => void;
   labels?: 'top' | 'all' | 'none';
+  /** Number of leading cars that get a label in 'top' mode. */
+  top?: number;
 }
 
-export function TrackMap({ selected, onSelect, labels = 'top' }: Props) {
+export function TrackMap({ selected, onSelect, labels = 'top', top = 5 }: Props) {
   const engine = useFrame();
-  const [w, h] = CIRCUIT.viewBox;
+  const C = engine.circuit;
+  const [w, h] = C.viewBox;
 
   const turnDots = useMemo(
     () =>
-      CIRCUIT.turns.map((t) => {
-        const p = sampleAt(t.f);
-        const [nx, ny] = outward(t.f);
-        return { x: p.x + nx * 18, y: p.y + ny * 18, label: t.label };
+      C.turns.map((t) => {
+        const p = sampleAt(C, t.f);
+        const [nx, ny] = outward(C, t.f);
+        return { x: p.x + nx * 16, y: p.y + ny * 16, label: t.label };
       }),
-    [],
+    [C],
   );
 
   const startLine = useMemo(() => {
-    const p = sampleAt(0);
-    const [nx, ny] = normalAt(0);
+    const p = sampleAt(C, 0);
+    const [nx, ny] = normalAt(C, 0);
     return { p, nx, ny };
-  }, []);
+  }, [C]);
 
   const pitPos = useMemo(() => {
-    const p = sampleAt(0.995);
-    const [nx, ny] = outward(0.995);
+    const p = sampleAt(C, 0.995);
+    const [nx, ny] = outward(C, 0.995);
     return { x: p.x - nx * 13, y: p.y - ny * 13 };
-  }, []);
+  }, [C]);
 
   const sel = selected ? engine.carById(selected) : null;
   const selFrac = sel ? engine.lapFraction(sel) : 0;
-  const sectorBounds = [0, CIRCUIT.sectors[0], CIRCUIT.sectors[1], 1];
+  const sectorBounds = [0, C.sectors[0], C.sectors[1], 1];
   const curSector = sel ? sel.sector : 0;
 
   const order = engine.order;
-  const showLabel = (c: Car) => labels === 'all' || (labels === 'top' && c.position <= 5) || c.driver.id === selected;
+  const showLabel = (c: Car) => labels === 'all' || (labels === 'top' && c.position <= top) || c.driver.id === selected;
 
   const placed = order.map((c, idx) => {
     if (c.status === 'PIT') return { c, x: pitPos.x - idx * 0.6, y: pitPos.y, f: 0 };
     if (c.status === 'GRID' || c.dist < 0) {
-      const f = c.dist / (CIRCUIT.lengthKm * 1000);
-      const p = sampleAt(f);
-      const [nx, ny] = normalAt(f);
+      const f = c.dist / engine.lapM;
+      const p = sampleAt(C, f);
+      const [nx, ny] = normalAt(C, f);
       const side = c.grid % 2 === 0 ? 4 : -4;
       return { c, x: p.x + nx * side, y: p.y + ny * side, f };
     }
     const f = engine.lapFraction(c);
-    const p = sampleAt(f);
+    const p = sampleAt(C, f);
     return { c, x: p.x, y: p.y, f };
   });
 
   return (
-    <svg className="map" viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${CIRCUIT.name} live map`}>
+    <svg className="map" viewBox={`0 0 ${w} ${h}`} role="img" aria-label={`${C.circuit} live map`}>
       <defs>
         <filter id="carShadow" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="2" stdDeviation="2" floodOpacity="0.6" />
@@ -101,15 +111,15 @@ export function TrackMap({ selected, onSelect, labels = 'top' }: Props) {
       ))}
 
       {/* track */}
-      <path d={CIRCUIT.path} fill="none" stroke="rgba(0,0,0,.45)" strokeWidth="13" strokeLinejoin="round" />
-      <path d={CIRCUIT.path} fill="none" stroke="#f3f3f3" strokeWidth="5.5" strokeLinejoin="round" />
-      <path d={CIRCUIT.path} fill="none" stroke="rgba(0,0,0,.2)" strokeWidth="1" strokeLinejoin="round" />
+      <path d={C.path} fill="none" stroke="rgba(0,0,0,.45)" strokeWidth="13" strokeLinejoin="round" />
+      <path d={C.path} fill="none" stroke="#f3f3f3" strokeWidth="5.5" strokeLinejoin="round" />
+      <path d={C.path} fill="none" stroke="rgba(0,0,0,.2)" strokeWidth="1" strokeLinejoin="round" />
 
       {/* selected driver's current sector + trail */}
       {sel && sel.status === 'RUN' && sel.dist > 0 && (
         <>
           <path
-            d={CIRCUIT.path}
+            d={C.path}
             pathLength={1000}
             fill="none"
             stroke="var(--red)"
@@ -164,16 +174,26 @@ export function TrackMap({ selected, onSelect, labels = 'top' }: Props) {
         // place selected first so it gets the best spot
         items.sort((a, b) => Number(b.c.driver.id === selected) - Number(a.c.driver.id === selected));
         return items.map(({ c, x, y, f }) => {
-          const [nx, ny] = c.status === 'RUN' || c.status === 'FIN' ? outward(f) : [0, -1];
-          let dist = 26;
-          let lx = x + nx * dist;
-          let ly = y + ny * dist;
-          for (let k = 0; k < 8 && boxes.some((b) => Math.abs(b.x - lx) < bw + 2 && Math.abs(b.y - ly) < bh + 2); k++) {
-            dist += 14;
-            // alternate sideways along the track direction as well as outward
-            const side = (k % 2 === 0 ? 1 : -1) * (bw / 2 + 4) * Math.ceil((k + 1) / 2) * 0.5;
-            lx = x + nx * dist + ny * side;
-            ly = y + ny * dist - nx * side;
+          const [nx, ny] = c.status === 'RUN' || c.status === 'FIN' ? outward(C, f) : [0, -1];
+          const inside = (x0: number, y0: number) => x0 > bw / 2 + 2 && x0 < w - bw / 2 - 2 && y0 > bh / 2 + 2 && y0 < h - bh / 2 - 2;
+          const free = (x0: number, y0: number) => !boxes.some((b) => Math.abs(b.x - x0) < bw + 2 && Math.abs(b.y - y0) < bh + 2);
+          // Try spots outward first, then inward, stepping further away and sideways along the track.
+          let lx = x + nx * 26;
+          let ly = y + ny * 26;
+          search: for (let ring = 0; ring < 6; ring++) {
+            for (const dir of [1, -1]) {
+              for (const side of [0, 1, -1]) {
+                const d = 26 + ring * 15;
+                const sx = side * (bw + 4) * (ring > 0 ? 1 : 0.6);
+                const cx = x + nx * d * dir + ny * sx;
+                const cy = y + ny * d * dir - nx * sx;
+                if (inside(cx, cy) && free(cx, cy)) {
+                  lx = cx;
+                  ly = cy;
+                  break search;
+                }
+              }
+            }
           }
           lx = Math.min(w - bw / 2 - 2, Math.max(bw / 2 + 2, lx));
           ly = Math.min(h - bh / 2 - 2, Math.max(bh / 2 + 2, ly));
